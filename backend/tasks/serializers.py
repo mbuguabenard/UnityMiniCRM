@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Company, Contact, Deal, Task
+from .models import Company, Contact, Deal, Task, UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -8,6 +8,48 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
         read_only_fields = ['id']
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='user.first_name', required=False, allow_blank=True)
+    last_name = serializers.CharField(source='user.last_name', required=False, allow_blank=True)
+    email = serializers.EmailField(source='user.email', required=False, allow_blank=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'id', 'username', 'first_name', 'last_name', 'email',
+            'phone', 'job_title', 'department', 'company', 'profile_picture', 'bio'
+        ]
+        read_only_fields = ['id', 'username', 'created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        """Ensure user fields are properly included in response"""
+        ret = super().to_representation(instance)
+        ret['first_name'] = instance.user.first_name
+        ret['last_name'] = instance.user.last_name
+        ret['email'] = instance.user.email
+        ret['username'] = instance.user.username
+        return ret
+
+    def update(self, instance, validated_data):
+        # Extract nested user dict (DRF groups dotted-source fields here)
+        user_data = validated_data.pop('user', {})
+        
+        # Update User model fields
+        user = instance.user
+        for field, value in user_data.items():
+            setattr(user, field, value)
+        user.save()
+        
+        # Update UserProfile fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+
 
 
 class CompanySerializer(serializers.ModelSerializer):
