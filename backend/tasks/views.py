@@ -6,11 +6,40 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db.models import Count, Sum, Q
-from .models import Company, Contact, Deal, Task
+from .models import Company, Contact, Deal, Task, UserProfile
 from .serializers import (
     CompanySerializer, ContactSerializer, DealSerializer,
-    TaskSerializer, UserSerializer
+    TaskSerializer, UserSerializer, UserProfileSerializer
 )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup_view(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+
+    if not email or not password:
+        return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['POST'])
@@ -29,11 +58,27 @@ def login_view(request):
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+
+
 @api_view(['POST'])
 def logout_view(request):
     if request.user.is_authenticated:
         request.user.auth_token.delete()
     return Response({'message': 'Logged out successfully'})
+
+
+@api_view(['GET', 'PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+
+def profile_view(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == 'GET':
+        return Response(UserProfileSerializer(profile).data)
+    serializer = UserProfileSerializer(instance=profile, data=request.data,partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)
+
 
 
 @api_view(['GET'])
