@@ -23,6 +23,11 @@ export const authService = {
     return response.data
   },
 
+  async signup(email, password, first_name = '', last_name = '') {
+    const response = await api.post('/auth/signup/', { email, password, first_name, last_name })
+    return response.data
+  },
+
   async logout() {
     await api.post('/auth/logout/')
     localStorage.removeItem('token')
@@ -37,6 +42,19 @@ export const crmService = {
     return response.data
   },
 
+// GET current user's profile
+async getProfile() {
+  const response = await api.get('/profile/')
+  return response.data
+},
+
+// Update current user's profile
+async updateProfile(payload) {
+  const response = await api.put('/profile/', payload)
+  return response.data
+},
+
+  
   // Companies
   async getCompanies() {
     const response = await api.get('/companies/')
