@@ -126,13 +126,20 @@ const editItem = (item) => {
 }
 
 const deleteItem = async (item) => {
-  if (confirm('Are you sure you want to delete this deal?')) {
-    try {
-      await crmService.deleteDeal(item.id)
-      await loadDeals()
-    } catch (error) {
-      console.error('Failed to delete deal:', error)
-    }
+  itemToDelete.value = item
+  showDeleteDialog.value = true
+}
+
+const confirmDelete = async () => {
+  try {
+    if (!itemToDelete.value) return
+    await crmService.deleteDeal(itemToDelete.value.id)
+    await loadDeals()
+  } catch (error) {
+    console.error('Failed to delete deal:', error)
+  } finally {
+    showDeleteDialog.value = false
+    itemToDelete.value = null
   }
 }
 
@@ -171,6 +178,11 @@ const getDealColor = (index) => {
   const colors = ['primary', 'secondary', 'success', 'info', 'warning', 'purple', 'pink', 'indigo', 'teal', 'orange']
   return colors[index % colors.length]
 }
+
+const showDeleteDialog = ref(false)
+const itemToDelete = ref(null)
+
+
 </script>
 
 <template>
@@ -435,6 +447,21 @@ const getDealColor = (index) => {
           <v-spacer></v-spacer>
           <v-btn color="grey" variant="text" @click="close" size="large">Cancel</v-btn>
           <v-btn color="primary" variant="flat" @click="save" size="large" prepend-icon="mdi-content-save">Save Deal</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="showDeleteDialog" max-width="480px">
+      <v-card>
+        <v-card-title class="text-h6">Confirm delete</v-card-title>
+        <v-card-text>
+          Are you sure you want to delete <strong>{{ itemToDelete ? itemToDelete.title : '' }}</strong>?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn variant="text" color="grey" @click="showDeleteDialog = false">Cancel</v-btn>
+          <v-btn color="error" @click="confirmDelete">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

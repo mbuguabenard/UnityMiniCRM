@@ -20,6 +20,9 @@ const editedItem = ref({
   assigned_to: null
 })
 
+const showDeleteDialog = ref(false)
+const itemToDelete = ref(null)
+
 const defaultItem = {
   title: '',
   description: '',
@@ -132,13 +135,20 @@ const editItem = (item) => {
 }
 
 const deleteItem = async (item) => {
-  if (confirm('Are you sure you want to delete this task?')) {
-    try {
-      await crmService.deleteTask(item.id)
-      await loadTasks()
-    } catch (error) {
-      console.error('Failed to delete task:', error)
-    }
+  itemToDelete.value = item
+  showDeleteDialog.value = true
+}
+
+const confirmDelete = async () => {
+  try {
+    if (!itemToDelete.value) return
+    await crmService.deleteTask(itemToDelete.value.id)
+    await loadTasks()
+  } catch (error) {
+    console.error('Failed to delete task:', error)
+  } finally {
+    showDeleteDialog.value = false
+    itemToDelete.value = null
   }
 }
 
@@ -460,6 +470,21 @@ const getTaskColor = (index) => {
           <v-spacer></v-spacer>
           <v-btn color="grey" variant="text" @click="close" size="large">Cancel</v-btn>
           <v-btn color="primary" variant="flat" @click="save" size="large" prepend-icon="mdi-content-save">Save Task</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="showDeleteDialog" max-width="480px">
+      <v-card>
+        <v-card-title class="text-h6">Confirm delete</v-card-title>
+        <v-card-text>
+          Are you sure you want to delete <strong>{{ itemToDelete ? itemToDelete.title : '' }}</strong>?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn variant="text" color="grey" @click="showDeleteDialog = false">Cancel</v-btn>
+          <v-btn color="error" @click="confirmDelete">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
