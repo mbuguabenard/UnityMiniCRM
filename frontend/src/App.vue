@@ -60,6 +60,14 @@ const menuItems = [
     color: '#0288D1',
     gradient: 'linear-gradient(135deg, #039BE5 0%, #01579B 100%)'
   },
+  { 
+    title: 'My Profile', 
+    icon: 'mdi-account-circle', 
+    route: '/profile',
+    description: 'My details',
+    color: '#7B1FA2',
+    gradient: 'linear-gradient(135deg, #7B1FA2 0%, #01579B 100%)'
+  },
 ]
 
 const handleLogout = async () => {
@@ -198,7 +206,7 @@ const getItemGradient = (item) => {
                   </div>
                   <v-divider class="my-3"></v-divider>
                   <v-list density="compact" class="bg-transparent">
-                    <v-list-item prepend-icon="mdi-account-circle" title="My Profile" subtitle="View your details"></v-list-item>
+                    <v-list-item prepend-icon="mdi-account-circle" title="My Profile" @click="router.push('/profile')"subtitle="View your details"></v-list-item>
                     <v-list-item prepend-icon="mdi-cog" title="Settings" subtitle="Preferences"></v-list-item>
                     <v-list-item prepend-icon="mdi-help-circle" title="Help & Support" subtitle="Get assistance"></v-list-item>
                     <v-divider class="my-2"></v-divider>

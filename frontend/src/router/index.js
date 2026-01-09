@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import ContactsView from '../views/ContactsView.vue'
 import CompaniesView from '../views/CompaniesView.vue'
 import DealsView from '../views/DealsView.vue'
 import TasksView from '../views/TasksView.vue'
+import ProfileView from '../views/ProfileView.vue'
 
 const routes = [
   {
@@ -14,10 +16,25 @@ const routes = [
     meta: { requiresGuest: true }
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: RegisterView,
+    meta: { requiresGuest: true }
+  },
+  {
     path: '/',
     name: 'Dashboard',
     component: DashboardView,
     meta: { requiresAuth: true }
+  },
+
+  {
+    path: '/profile',
+    name:'Profile',
+    component: ProfileView,
+    meta: {requiresAuth: true }
+
+
   },
   {
     path: '/contacts',
