@@ -144,6 +144,27 @@ npm run serve
 * Access `/profile` to view and update profile.
 * Verify deletion dialogs and client-side validation.
 
+5. **Run Automated Tests**
+
+From the project backend folder, create/activate your virtual environment, install dependencies, then run the Django test suite:
+
+```bash
+cd backend
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py test
+```
+
+To run only the `tasks` app tests:
+
+```bash
+python manage.py test tasks
+```
+
 ---
 
 ## Future Improvements
